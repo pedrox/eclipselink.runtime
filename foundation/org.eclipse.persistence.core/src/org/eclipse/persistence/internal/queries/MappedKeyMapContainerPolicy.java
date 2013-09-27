@@ -917,7 +917,6 @@ public class MappedKeyMapContainerPolicy extends MapContainerPolicy {
             }
         } else {
             Map<Object, Object> fromCache = session.getIdentityMapAccessorInstance().getAllFromIdentityMapWithEntityPK(values, elementDescriptor);
-            DatabaseRecord translationRow = new DatabaseRecord();
             List foreignKeyValues = new ArrayList(pks.length - fromCache.size());
             
             CacheKeyType cacheKeyType = this.elementDescriptor.getCachePolicy().getCacheKeyType();
@@ -932,10 +931,10 @@ public class MappedKeyMapContainerPolicy extends MapContainerPolicy {
                 }
             }
             if (!foreignKeyValues.isEmpty()){
-                translationRow.put(ForeignReferenceMapping.QUERY_BATCH_PARAMETER, foreignKeyValues);
                 ReadAllQuery query = new ReadAllQuery(elementDescriptor.getJavaClass());
                 query.setIsExecutionClone(true);
-                query.setTranslationRow(translationRow);
+                query.addArgument(ForeignReferenceMapping.QUERY_BATCH_PARAMETER);
+                query.addArgumentValue(foreignKeyValues);
                 query.setSession(session);
                 query.setSelectionCriteria(elementDescriptor.buildBatchCriteriaByPK(query.getExpressionBuilder(), query));
                 Collection<Object> temp = (Collection<Object>) session.executeQuery(query);
